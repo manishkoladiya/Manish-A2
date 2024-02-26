@@ -176,87 +176,98 @@ public class Board
             Grid[y, x].Occupant = "-";
         }
     }
-}
- // Here i am definig game as a public class
-public class Game
-{
-    private Board board;
-    private Player player1;
-    private Player player2;
-    private Player currentTurn;
-    private int totalTurns;
-
-    public Game()
+    public void MovePlayer(Player player, Position newPosition)
     {
-        board = new Board();
-        player1 = new Player("P1", new Position(0, 0));
-        player2 = new Player("P2", new Position(5, 5));
-        currentTurn = player1;
-        totalTurns = 1; // Start counting from 1
+
+        Grid[player.Position.Y, player.Position.X].Occupant = "-";
+        Grid[newPosition.Y, newPosition.X].Occupant = player.Name;
+        player.Position = newPosition;
+
     }
 
-    public void Start()
+    // Here i am definig game as a public class
+    public class Game
     {
-        while (!IsGameOver())
+        private Board board;
+        private Player player1;
+        private Player player2;
+        private Player currentTurn;
+        private int totalTurns;
+
+        public Game()
         {
-            board.Display();
-            PlayTurn();
-            totalTurns++;
-            SwitchTurn();
+            board = new Board();
+            player1 = new Player("P1", new Position(0, 0));
+            player2 = new Player("P2", new Position(5, 5));
+            currentTurn = player1;
+            totalTurns = 1; // Start counting from 1
         }
 
-        AnnounceWinner();
+        public void Start()
+        {
+            while (!IsGameOver())
+            {
+                board.Display();
+                PlayTurn();
+                totalTurns++;
+                SwitchTurn();
+            }
+
+            AnnounceWinner();
+        }
+
+        private void PlayTurn()
+        {
+            Console.WriteLine($"{currentTurn.Name}'s turn (Turn {currentTurn.TurnCount}). Enter direction (U/D/L/R): ");
+            char direction = char.ToUpper(Console.ReadKey().KeyChar);
+            Console.WriteLine();
+
+            if (board.IsValidMove(currentTurn, direction))
+            {
+                currentTurn.Move(direction);
+                board.CollectGem(currentTurn);
+                Console.WriteLine($"Player {currentTurn.Name} collected a gem!");
+
+            }
+            else
+            {
+                Console.WriteLine("Invalid move. Try again.");
+            }
+        }
+
+        private void SwitchTurn()
+        {
+            currentTurn = currentTurn == player1 ? player2 : player1;
+        }
+
+        private bool IsGameOver()
+        {
+            return totalTurns >= 30;
+        }
+
+        private void AnnounceWinner()
+        {
+            if (player1.GemCount > player2.GemCount)
+            {
+                Console.WriteLine("Player 1 wins!");
+            }
+            else if (player1.GemCount < player2.GemCount)
+            {
+                Console.WriteLine("Player 2 wins!");
+            }
+            else
+            {
+                Console.WriteLine("It's a tie!");
+            }
+        }
     }
 
-    private void PlayTurn()
+    class Program
     {
-        Console.WriteLine($"{currentTurn.Name}'s turn (Turn {currentTurn.TurnCount}). Enter direction (U/D/L/R): ");
-        char direction = char.ToUpper(Console.ReadKey().KeyChar);
-        Console.WriteLine();
-
-        if (board.IsValidMove(currentTurn, direction))
+        static void Main(string[] args)
         {
-            currentTurn.Move(direction);
-            board.CollectGem(currentTurn);
+            Game game = new Game();
+            game.Start();
         }
-        else
-        {
-            Console.WriteLine("Invalid move. Try again.");
-        }
-    }
-
-    private void SwitchTurn()
-    {
-        currentTurn = currentTurn == player1 ? player2 : player1;
-    }
-
-    private bool IsGameOver()
-    {
-        return totalTurns >= 30;
-    }
-
-    private void AnnounceWinner()
-    {
-        if (player1.GemCount > player2.GemCount)
-        {
-            Console.WriteLine("Player 1 wins!");
-        }
-        else if (player1.GemCount < player2.GemCount)
-        {
-            Console.WriteLine("Player 2 wins!");
-        }
-        else
-        {
-            Console.WriteLine("It's a tie!");
-        }
-    }
-}
-
-class Program
-{
-    static void Main(string[] args)
-    {
-        Game game = new Game();
-        game.Start();
     }
 }
